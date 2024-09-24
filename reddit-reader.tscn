@@ -77,24 +77,28 @@ size_flags_vertical = 3
 text = "Open Shell (folder)"
 
 [node name="ChangeWindowTitle" type="Button" parent="HBoxContainer/Actions/GridContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 text = "Change Window Title"
 
 [node name="ChangeWindowIcon" type="Button" parent="HBoxContainer/Actions/GridContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 text = "Change Window Icon"
 
 [node name="MoveWindowToForeground" type="Button" parent="HBoxContainer/Actions/GridContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 text = "Move Window to Foreground"
 
 [node name="RequestAttention" type="Button" parent="HBoxContainer/Actions/GridContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -147,6 +151,7 @@ size_flags_vertical = 3
 text = "Display Alert"
 
 [node name="KillCurrentProcess" type="Button" parent="HBoxContainer/Actions/GridContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3

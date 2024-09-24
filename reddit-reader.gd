@@ -90,7 +90,7 @@ func add_date(header: Variant) -> void:
 	}))
 
 func add_body(header: String) -> void:
-	rtl.append_text("\n[font_size=16][color=#eee
+	rtl.append_text("\n[font_size=20][color=#fff8
 	]{header}[/color][/font_size]\n\n".format({
 		header = header,
 	}))
