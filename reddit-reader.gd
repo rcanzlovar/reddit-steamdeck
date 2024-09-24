@@ -276,9 +276,19 @@ func prev_subreddit() -> void:
 
 ##########################################################
 # navigating around inside the posts of a subreddit
+var newpara = 0
 	
 func scroll_next():
+	#var newpara = 0
 	# Increase the scroll position by 1 line
+	print ("paragraphs[i]=",paragraphs[i],"j=",j)
+	if j > paragraphs[i]:
+		print ("boo!")
+		newpara = 0
+		while paragraphs[newpara] < j:
+			newpara += 1
+		i = newpara 
+	print ("newpara=",newpara," paragraphs[newpara]",paragraphs[newpara]," i=",i," j=",j)
 	if i < paragraphs.size()-1:
 		i += 1
 	else: 
@@ -354,7 +364,7 @@ func get_reddit(url : String):
 	var error = $HBoxContainer/HTTPRequest.request(url)
 	if error != OK:
 		OS.alert("Error connecting to internet ")
-		var data = subreddit_cache["saved"][url]
+		var data = subreddit_cache["cache"][url]["data"]
 		process_reddit_data(data)
 
 
@@ -366,18 +376,20 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 		
 		if parse_result == OK:
 			var data = json.get_data()  # Use get_data() to retrieve the parsed JSON object
-			if not subreddit_cache.has("saved"):
-				subreddit_cache["saved"] = {}  # Initialize it as an empty dictionary
-		
-			# save it to 
-			subreddit_cache["saved"][url] = {}
-			subreddit_cache["saved"][url]["data"] = data
+			# make sure the parents are there 
+			if not subreddit_cache.has("cache"):
+				subreddit_cache["cache"] = {}  # Initialize it as an empty dictionary
+			if not subreddit_cache["cache"].has(url):
+				subreddit_cache["cache"][url] = {}
+			subreddit_cache["cache"][url]["data"] = data
 			save_data()
 			process_reddit_data(data)
 		else:
 			print("Failed to parse JSON")
 	else:
 		print("HTTP request failed with code: %d" % response_code)
+		
+		
 func save_data():
 	#var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
 	var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
@@ -414,11 +426,11 @@ func process_reddit_data(data):
 		if flag == 0:
 			for element in post["data"]:
 				print ("element: ", element)
-			flag= 1
+			flag = 1
 		var post_title = post["data"]["title"]
 		var post_body = post["data"]["selftext"]
 		var post_created = post["data"]["created"]
-		var post_media = post["data"]["media"]
+		var post_url = post["data"]["url"]
 #		var post_date = post["data"]["date"]
 
 		if rtl is RichTextLabel:
@@ -438,4 +450,5 @@ func process_reddit_data(data):
 		add_title(post_title)
 		#add_date(post_created)
 		add_body(post_body)
-	subreddit_cache["saved"][url]["paragraphs"] = paragraphs
+		add_date(post_url)
+	subreddit_cache["cache"][url]["paragraphs"] = paragraphs
