@@ -73,6 +73,8 @@ func datetime_to_string(date: Dictionary) -> void:
 			second = str(date.second).pad_zeros(2),
 		})
 
+##########################################################
+# Routines Related to writing to the scrollable RichTextLabel
 # RTL Related routines 
 # clear the rtl RichTextLabel
 func clear_display() -> void:
@@ -110,6 +112,7 @@ func add_line(key: String, value: Variant) -> void:
 		value = value if str(value) != "" else "[color=#fff8](empty)[/color]",
 	}))
 
+##########################################################
 
 func sysstat() -> void:
 	# Grab focus so that the list can be scrolled (for keyboard/controller-friendly navigation).
@@ -225,8 +228,6 @@ func sysstat() -> void:
 	if video_adapter_driver_info.size() > 1:
 		add_line("Adapter driver version", video_adapter_driver_info[1])
 
-##extends Node
-
 
 func _ready() -> void:
 	# Grab focus so that the list can be scrolled (for keyboard/controller-friendly navigation).
@@ -236,6 +237,10 @@ func _ready() -> void:
 	
 	get_reddit(url)
 	
+##########################################################
+# SubReddit Related routines 
+
+# go to the next subreddit in the list, wrap around
 	
 func next_subreddit() -> void:
 	print ("#*#*#* subsize = ",subreddits.size(),"k=",k)
@@ -244,17 +249,17 @@ func next_subreddit() -> void:
 	else:
 		k += 1
 	url = subreddits[k]
-	
-	# wipe out the stuff in the display
+
 	clear_display()
 	
-	# clear the paragraphs, make line 0 be the first paragraph:
+	# clear the paragraphs index, make line 0 be the first paragraph
+	# to include the header 
 	paragraphs = [ 0 ]
 	
 	get_reddit(url)
 	
+# go to the previous subreddit in the list, wrap around
 func prev_subreddit() -> void:
-	print ("#*#*#* subsize = ",subreddits.size(),"k=",k)
 	if k == 0:
 		k =  subreddits.size() - 2
 	else:
@@ -263,14 +268,14 @@ func prev_subreddit() -> void:
 	
 	# wipe out the stuff in the display
 	clear_display()
-	
-	# clear the paragraphs, make line 0 be the first paragraph:
+
 	paragraphs = [ 0 ]
 	
 	get_reddit(url)
 	
 
-
+##########################################################
+# navigating around inside the posts of a subreddit
 	
 func scroll_next():
 	# Increase the scroll position by 1 line
@@ -314,6 +319,8 @@ func scroll_up():
 		print("jump=",jump," i=",i)
 	rtl.scroll_to_line(j)
 
+##################################################################
+# link the actions to functions
 # Handle input for scrolling
 # this is where the actions that are defined in Project -> Project Settings -> Input Map
 # get tied to the functions here. 
@@ -334,11 +341,13 @@ func _input(event: InputEvent) -> void:
 		toggle_action()
 	elif event.is_action_pressed("sysstat"):
 		sysstat()
+##################################################################
 
 func toggle_action():
 	print ("toggle action", j)
 	$HBoxContainer/Actions.visible = !$HBoxContainer/Actions.visible
 	print($HBoxContainer/Actions.visible)
+##################################################################
 
 func get_reddit(url : String):
 	$HBoxContainer/HTTPRequest.connect("request_completed", Callable(self, "_on_request_completed"))
@@ -363,12 +372,35 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 			# save it to 
 			subreddit_cache["saved"][url] = {}
 			subreddit_cache["saved"][url]["data"] = data
+			save_data()
 			process_reddit_data(data)
 		else:
 			print("Failed to parse JSON")
 	else:
 		print("HTTP request failed with code: %d" % response_code)
+func save_data():
+	#var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
+	var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
+	var saved_data = {}
+	saved_data["cache"] = subreddit_cache
+	saved_data["subreddits"] = subreddits
+	
+	var json = JSON.stringify(saved_data)
+	file.store_string(json)
+	file.close()
 
+func load_data():
+	#var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
+	var file = FileAccess.open("user://redditcache.json", FileAccess.READ)
+	
+	var json = file.get_as_text()
+	var saved_data = JSON.parse_string(json)
+	
+	subreddit_cache = saved_data["cache"]
+	subreddits =  saved_data["subreddits"]
+	
+	file.close()
+	
 func process_reddit_data(data):
 	var flag = 0
 	i = 0
