@@ -5,10 +5,14 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dl4cr"]
 
-[node name="OSTest" type="Panel"]
+[node name="Reddit-reader" type="Panel"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = -1.0
+offset_top = 1.0
+offset_right = -1.0
+offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
@@ -27,6 +31,7 @@ grow_vertical = 2
 theme_override_constants/separation = 10
 
 [node name="Features" type="RichTextLabel" parent="HBoxContainer"]
+custom_minimum_size = Vector2(850, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -35,6 +40,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_dl4cr")
 bbcode_enabled = true
 
 [node name="Actions" type="VBoxContainer" parent="HBoxContainer"]
+custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -57,7 +63,6 @@ popup/item_1/id = 1
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-columns = 2
 
 [node name="OpenShellWeb" type="Button" parent="HBoxContainer/Actions/GridContainer"]
 layout_mode = 2

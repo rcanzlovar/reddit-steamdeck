@@ -2,12 +2,15 @@ extends Node
 
 @onready var rtl: RichTextLabel = $HBoxContainer/Features
 @onready var csharp_test: Node = $CSharpTest
+
 @onready var url : String = "https://www.reddit.com/r/gamedev.json"
 
 @onready var i : int = 0 
 # track what paragraph we are in the scrollable window
+
 @onready var j : int = 0 
 # track what line we are in the scrollable window
+
 @onready var k : int = 0 
 # track which subreddit index we are using 
 
@@ -26,6 +29,13 @@ extends Node
 	"https://www.reddit.com/r/outoftheloop.json",	
 	"https://www.reddit.com/r/longmont.json"
 ]
+
+#This is for caching subreddit content so i don't have 
+# to call the server just to move from one sub to 
+# another. Also will allow for caching stuff to read 
+# offline eventually. 
+@onready var subreddit_cache = {}
+
 
 
 
@@ -63,26 +73,32 @@ func datetime_to_string(date: Dictionary) -> void:
 			second = str(date.second).pad_zeros(2),
 		})
 
-
-func scan_midi_devices() -> String:
-	OS.open_midi_inputs()
-	var devices := ", ".join(OS.get_connected_midi_inputs())
-	OS.close_midi_inputs()
-	return devices
-
+# RTL Related routines 
+# clear the rtl RichTextLabel
 func clear_display() -> void:
 	rtl.clear()
 
 
 func add_title(header: String) -> void:
-	rtl.append_text("\n[font_size=24][color=#6df]{header}[/color][/font_size]\n\n".format({
-		header = header,
-	}))
-func add_header(header: String) -> void:
-	rtl.append_text("\n[font_size=24][color=#FF4500]r/{header}[/color][/font_size]\n\n".format({
+	rtl.append_text("\n[font_size=24][color=#6df]{header}[/color][/font_size]\n".format({
 		header = header,
 	}))
 
+func add_date(header: Variant) -> void:
+	rtl.append_text("[font_size=16][color=#2df]{header}[/color][/font_size]\n".format({
+		header = header,
+	}))
+
+func add_body(header: String) -> void:
+	rtl.append_text("\n[font_size=16][color=#eee
+	]{header}[/color][/font_size]\n\n".format({
+		header = header,
+	}))
+
+func add_header(header: String) -> void:
+	rtl.append_text("\n[font_size=32][color=#FF4500]r/{header}[/color][/font_size]\n\n".format({
+		header = header,
+	}))
 
 func add_line(key: String, value: Variant) -> void:
 	if typeof(value) == TYPE_BOOL:
@@ -95,9 +111,10 @@ func add_line(key: String, value: Variant) -> void:
 	}))
 
 
-func _notready() -> void:
+func sysstat() -> void:
 	# Grab focus so that the list can be scrolled (for keyboard/controller-friendly navigation).
 	rtl.grab_focus()
+	rtl.clear()
 
 	add_title("Audio")
 	add_line("Mix rate", "%d Hz" % AudioServer.get_mix_rate())
@@ -315,6 +332,8 @@ func _input(event: InputEvent) -> void:
 		prev_subreddit()
 	elif event.is_action_pressed("toggle_controls"):
 		toggle_action()
+	elif event.is_action_pressed("sysstat"):
+		sysstat()
 
 func toggle_action():
 	print ("toggle action", j)
@@ -323,7 +342,13 @@ func toggle_action():
 
 func get_reddit(url : String):
 	$HBoxContainer/HTTPRequest.connect("request_completed", Callable(self, "_on_request_completed"))
-	$HBoxContainer/HTTPRequest.request(url)
+	var error = $HBoxContainer/HTTPRequest.request(url)
+	if error != OK:
+		OS.alert("Error connecting to internet ")
+		var data = subreddit_cache["saved"][url]
+		process_reddit_data(data)
+
+
 	
 func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	if response_code == 200:
@@ -332,6 +357,12 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 		
 		if parse_result == OK:
 			var data = json.get_data()  # Use get_data() to retrieve the parsed JSON object
+			if not subreddit_cache.has("saved"):
+				subreddit_cache["saved"] = {}  # Initialize it as an empty dictionary
+		
+			# save it to 
+			subreddit_cache["saved"][url] = {}
+			subreddit_cache["saved"][url]["data"] = data
 			process_reddit_data(data)
 		else:
 			print("Failed to parse JSON")
@@ -340,6 +371,8 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 
 func process_reddit_data(data):
 	var flag = 0
+	i = 0
+	j = 0
 	# Show the name of the subreddit we're looking at 
 	var subreddit : String = url.get_file().get_basename()
 	DisplayServer.window_set_title(subreddit)
@@ -352,6 +385,8 @@ func process_reddit_data(data):
 			flag= 1
 		var post_title = post["data"]["title"]
 		var post_body = post["data"]["selftext"]
+		var post_created = post["data"]["created"]
+		var post_media = post["data"]["media"]
 #		var post_date = post["data"]["date"]
 
 		if rtl is RichTextLabel:
@@ -368,8 +403,7 @@ func process_reddit_data(data):
 		else:
 			print("RTL is not a RichTextLabel")
 		
-		#var scrollbar = rtl.get_v_scrollbar()
-		#add_title(post_date)
 		add_title(post_title)
-		#print(post_title)	
-		add_line(":", post_body)
+		#add_date(post_created)
+		add_body(post_body)
+	subreddit_cache["saved"][url]["paragraphs"] = paragraphs

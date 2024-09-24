@@ -53,55 +53,6 @@ func _on_request_attention_pressed() -> void:
 	DisplayServer.window_set_title(ProjectSettings.get_setting("application/config/name"))
 
 
-func _on_vibrate_device_short_pressed() -> void:
-	Input.vibrate_handheld(200)
-
-
-func _on_vibrate_device_long_pressed() -> void:
-	Input.vibrate_handheld(1000)
-
-
-func _on_add_global_menu_items_pressed() -> void:
-	if not DisplayServer.has_feature(DisplayServer.FEATURE_GLOBAL_MENU):
-		OS.alert("Global menus are not supported by the current display server (%s)." % DisplayServer.get_name())
-		return
-
-	# Add a menu to the main menu bar.
-	DisplayServer.global_menu_add_submenu_item("_main", "Hello", "_main/Hello")
-	DisplayServer.global_menu_add_item(
-			"_main/Hello",
-			"World",
-			func(tag: String) -> void: print("Clicked main 1 " + str(tag)),
-			func(tag: String) -> void: print("Key main 1 " + str(tag)),
-			null,
-			(KEY_MASK_META | KEY_1) as Key
-	)
-	DisplayServer.global_menu_add_separator("_main/Hello")
-	DisplayServer.global_menu_add_item("_main/Hello", "World2", func(tag: String) -> void: print("Clicked main 2 " + str(tag)))
-
-	# Add a menu to the Dock context menu.
-	DisplayServer.global_menu_add_submenu_item("_dock", "Hello", "_dock/Hello")
-	DisplayServer.global_menu_add_item("_dock/Hello", "World", func(tag: String) -> void: print("Clicked dock 1 " + str(tag)))
-	DisplayServer.global_menu_add_separator("_dock/Hello")
-	DisplayServer.global_menu_add_item("_dock/Hello", "World2", func(tag: String) -> void: print("Clicked dock 2 " + str(tag)))
-
-
-func _on_remove_global_menu_item_pressed() -> void:
-	if not DisplayServer.has_feature(DisplayServer.FEATURE_GLOBAL_MENU):
-		OS.alert("Global menus are not supported by the current display server (%s)." % DisplayServer.get_name())
-		return
-
-	DisplayServer.global_menu_remove_item("_main/Hello", 2)
-	DisplayServer.global_menu_remove_item("_main/Hello", 1)
-	DisplayServer.global_menu_remove_item("_main/Hello", 0)
-	DisplayServer.global_menu_remove_item("_main", 0)
-
-	DisplayServer.global_menu_remove_item("_dock/Hello", 2)
-	DisplayServer.global_menu_remove_item("_dock/Hello", 1)
-	DisplayServer.global_menu_remove_item("_dock/Hello", 0)
-	DisplayServer.global_menu_remove_item("_dock", 0)
-
-
 func _on_get_clipboard_pressed() -> void:
 	if not DisplayServer.has_feature(DisplayServer.FEATURE_CLIPBOARD):
 		OS.alert("Clipboard I/O is not supported by the current display server (%s)." % DisplayServer.get_name())
