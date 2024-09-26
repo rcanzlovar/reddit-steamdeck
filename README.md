@@ -36,6 +36,7 @@ https://www.reddit.com/r/gamedev/comments/1fh2no4/warning_evidence_p1_games_run_
 https://www.reddit.com/r/gamedev/comments/1fh2no4/warning_evidence_p1_games_run_by_samuel_martin.json
 
 
+key for subreddit name (like for r/all) : subreddit_name_prefixed
 
 
 
