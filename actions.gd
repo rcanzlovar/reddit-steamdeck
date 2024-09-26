@@ -1,10 +1,11 @@
+#class Actions:
 extends Node
 
 func _on_open_shell_web_pressed() -> void:
 	#OS.shell_open(url)
 	#print("url ",url)
 	OS.shell_open("https://rcanzlovar.com/drugfiend/")
-	var script_a = get_node("res://actionnns.gd")
+	var script_a = get_node("res://actions.gd")
 	#OS.shell_open(script_a.url)  # Acces shared_value from Script A
 	print(script_a)  # Acces shared_value from Script A
 	

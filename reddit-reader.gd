@@ -18,9 +18,12 @@ extends Node
 # article headers for easier skipping around
 @onready var paragraphs : Array = [ 0 ]
 
-@onready var subreddits : Array[String] = [
+@export var subreddits : Array[String] = [
+	"https://www.reddit.com/r/randnsfw.json",
+	"https://www.reddit.com/r/hairy.json",
 	"https://www.reddit.com/r/gamedev.json",
 	"https://www.reddit.com/r/boomersbeingfools.json",	
+	"https://www.reddit.com/r/anythinggoesnews.json",	
 	"https://www.reddit.com/r/flipperzero.json",	
 	"https://www.reddit.com/r/hitchhiking.json",	
 	"https://www.reddit.com/r/leaves.json",	
@@ -235,7 +238,9 @@ func _ready() -> void:
 	# wipe out the stuff in the display
 	clear_display()
 	
-	get_reddit(url)
+	#get_reddit(url)
+	sysstat()
+	
 	
 ##########################################################
 # SubReddit Related routines 
@@ -249,6 +254,7 @@ func next_subreddit() -> void:
 	else:
 		k += 1
 	url = subreddits[k]
+	OS.alert("subreddits:",subreddits[2])
 
 	clear_display()
 	
@@ -281,13 +287,14 @@ var newpara = 0
 func scroll_next():
 	#var newpara = 0
 	# Increase the scroll position by 1 line
+	# problem was that if you went down by article, then went down by 
 	print ("paragraphs[i]=",paragraphs[i],"j=",j)
 	if j > paragraphs[i]:
 		print ("boo!")
 		newpara = 0
 		while paragraphs[newpara] < j:
 			newpara += 1
-		i = newpara 
+		i = newpara -1
 	print ("newpara=",newpara," paragraphs[newpara]",paragraphs[newpara]," i=",i," j=",j)
 	if i < paragraphs.size()-1:
 		i += 1
@@ -425,7 +432,8 @@ func process_reddit_data(data):
 	for post in data["data"]["children"]:
 		if flag == 0:
 			for element in post["data"]:
-				print ("element: ", element)
+				#print ("element: ", element)
+				pass
 			flag = 1
 		var post_title = post["data"]["title"]
 		var post_body = post["data"]["selftext"]
@@ -451,4 +459,15 @@ func process_reddit_data(data):
 		#add_date(post_created)
 		add_body(post_body)
 		add_date(post_url)
+		# see if i can detect a post that is just a picture
+		#print ("check post for image")
+		var regex = RegEx.new()
+		regex.compile("(http.+[png|gif|jpg|jpeg|art])")
+		regex.compile("\\[(http.+)\\]")
+		var result = regex.search(post_body)
+		if result:
+			
+			print("first ",result.strings[1]) # Would print n-0123
+			print("found ",result.get_string()) # Would print n-0123
+	
 	subreddit_cache["cache"][url]["paragraphs"] = paragraphs

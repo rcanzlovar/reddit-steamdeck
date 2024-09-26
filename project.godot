@@ -21,6 +21,7 @@ config/tags=PackedStringArray("demo", "official", "porting")
 run/main_scene="res://reddit-reader.tscn"
 config/features=PackedStringArray("4.3")
 run/low_processor_mode=true
+boot_splash/image="/home/rca/Pictures/Bob Dobbs Slack like hope .png"
 config/icon="res://icon.webp"
 
 [debug]
@@ -92,3 +93,4 @@ sysstat={
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
