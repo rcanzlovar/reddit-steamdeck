@@ -20,7 +20,7 @@ extends Node
 
 @export var subreddits : Array[String] = [
 	"https://www.reddit.com/r/randnsfw.json",
-	"https://www.reddit.com/r/hairy.json",
+	"https://www.reddit.com/r/gonewildstories.json",
 	"https://www.reddit.com/r/gamedev.json",
 	"https://www.reddit.com/r/boomersbeingfools.json",	
 	"https://www.reddit.com/r/anythinggoesnews.json",	
