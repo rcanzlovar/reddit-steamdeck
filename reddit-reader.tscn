@@ -191,6 +191,38 @@ text = "Kill Current Process"
 
 [node name="HTTPRequest" type="HTTPRequest" parent="HBoxContainer"]
 
+[node name="SubredditManagerDialog" type="AcceptDialog" parent="HBoxContainer"]
+
+[node name="Label" type="Label" parent="HBoxContainer/SubredditManagerDialog"]
+theme_override_font_sizes/font_size = 24
+text = "dialog"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/SubredditManagerDialog"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="ItemList" type="ItemList" parent="HBoxContainer/SubredditManagerDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="LineEdit" type="LineEdit" parent="HBoxContainer/SubredditManagerDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/SubredditManagerDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="HBoxContainer/SubredditManagerDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Add Subreddit"
+
+[node name="Button2" type="Button" parent="HBoxContainer/SubredditManagerDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Delete Subreddit"
+
+[node name="Button3" type="Button" parent="HBoxContainer/SubredditManagerDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Close"
+
 [node name="CSharpTest" type="Node" parent="."]
 
 [connection signal="pressed" from="HBoxContainer/Actions/GridContainer/OpenShellWeb" to="HBoxContainer/Actions" method="_on_open_shell_web_pressed"]

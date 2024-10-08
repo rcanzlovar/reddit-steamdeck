@@ -2,15 +2,12 @@ extends Node
 
 @onready var rtl: RichTextLabel = $HBoxContainer/Features
 @onready var csharp_test: Node = $CSharpTest
-
 @onready var url : String = "https://www.reddit.com/r/gamedev.json"
 
 @onready var i : int = 0 
 # track what paragraph we are in the scrollable window
-
 @onready var j : int = 0 
 # track what line we are in the scrollable window
-
 @onready var k : int = 0 
 # track which subreddit index we are using 
 
@@ -18,12 +15,15 @@ extends Node
 # article headers for easier skipping around
 @onready var paragraphs : Array = [ 0 ]
 
+<<<<<<< HEAD
 @export var subreddits : Array[String] = [
 	"https://www.reddit.com/r/randnsfw.json",
 	"https://www.reddit.com/r/gonewildstories.json",
+=======
+@onready var subreddits : Array[String] = [
+>>>>>>> d8c2287 (Added dialog elements in scene)
 	"https://www.reddit.com/r/gamedev.json",
 	"https://www.reddit.com/r/boomersbeingfools.json",	
-	"https://www.reddit.com/r/anythinggoesnews.json",	
 	"https://www.reddit.com/r/flipperzero.json",	
 	"https://www.reddit.com/r/hitchhiking.json",	
 	"https://www.reddit.com/r/leaves.json",	
@@ -32,13 +32,6 @@ extends Node
 	"https://www.reddit.com/r/outoftheloop.json",	
 	"https://www.reddit.com/r/longmont.json"
 ]
-
-#This is for caching subreddit content so i don't have 
-# to call the server just to move from one sub to 
-# another. Also will allow for caching stuff to read 
-# offline eventually. 
-@onready var subreddit_cache = {}
-
 
 
 
@@ -76,34 +69,26 @@ func datetime_to_string(date: Dictionary) -> void:
 			second = str(date.second).pad_zeros(2),
 		})
 
-##########################################################
-# Routines Related to writing to the scrollable RichTextLabel
-# RTL Related routines 
-# clear the rtl RichTextLabel
+
+func scan_midi_devices() -> String:
+	OS.open_midi_inputs()
+	var devices := ", ".join(OS.get_connected_midi_inputs())
+	OS.close_midi_inputs()
+	return devices
+
 func clear_display() -> void:
 	rtl.clear()
 
 
 func add_title(header: String) -> void:
-	rtl.append_text("\n[font_size=24][color=#6df]{header}[/color][/font_size]\n".format({
+	rtl.append_text("\n[font_size=24][color=#6df]{header}[/color][/font_size]\n\n".format({
 		header = header,
 	}))
-
-func add_date(header: Variant) -> void:
-	rtl.append_text("[font_size=16][color=#2df]{header}[/color][/font_size]\n".format({
-		header = header,
-	}))
-
-func add_body(header: String) -> void:
-	rtl.append_text("\n[font_size=20][color=#fff8
-	]{header}[/color][/font_size]\n\n".format({
-		header = header,
-	}))
-
 func add_header(header: String) -> void:
-	rtl.append_text("\n[font_size=32][color=#FF4500]r/{header}[/color][/font_size]\n\n".format({
+	rtl.append_text("\n[font_size=24][color=#FF4500]r/{header}[/color][/font_size]\n\n".format({
 		header = header,
 	}))
+
 
 func add_line(key: String, value: Variant) -> void:
 	if typeof(value) == TYPE_BOOL:
@@ -115,12 +100,10 @@ func add_line(key: String, value: Variant) -> void:
 		value = value if str(value) != "" else "[color=#fff8](empty)[/color]",
 	}))
 
-##########################################################
 
-func sysstat() -> void:
+func _notready() -> void:
 	# Grab focus so that the list can be scrolled (for keyboard/controller-friendly navigation).
 	rtl.grab_focus()
-	rtl.clear()
 
 	add_title("Audio")
 	add_line("Mix rate", "%d Hz" % AudioServer.get_mix_rate())
@@ -231,6 +214,8 @@ func sysstat() -> void:
 	if video_adapter_driver_info.size() > 1:
 		add_line("Adapter driver version", video_adapter_driver_info[1])
 
+##extends Node
+
 
 func _ready() -> void:
 	# Grab focus so that the list can be scrolled (for keyboard/controller-friendly navigation).
@@ -238,14 +223,8 @@ func _ready() -> void:
 	# wipe out the stuff in the display
 	clear_display()
 	
-	#get_reddit(url)
-	sysstat()
+	get_reddit(url)
 	
-	
-##########################################################
-# SubReddit Related routines 
-
-# go to the next subreddit in the list, wrap around
 	
 func next_subreddit() -> void:
 	print ("#*#*#* subsize = ",subreddits.size(),"k=",k)
@@ -254,18 +233,17 @@ func next_subreddit() -> void:
 	else:
 		k += 1
 	url = subreddits[k]
-	OS.alert("subreddits:",subreddits[2])
-
+	
+	# wipe out the stuff in the display
 	clear_display()
 	
-	# clear the paragraphs index, make line 0 be the first paragraph
-	# to include the header 
+	# clear the paragraphs, make line 0 be the first paragraph:
 	paragraphs = [ 0 ]
 	
 	get_reddit(url)
 	
-# go to the previous subreddit in the list, wrap around
 func prev_subreddit() -> void:
+	print ("#*#*#* subsize = ",subreddits.size(),"k=",k)
 	if k == 0:
 		k =  subreddits.size() - 2
 	else:
@@ -274,28 +252,17 @@ func prev_subreddit() -> void:
 	
 	# wipe out the stuff in the display
 	clear_display()
-
+	
+	# clear the paragraphs, make line 0 be the first paragraph:
 	paragraphs = [ 0 ]
 	
 	get_reddit(url)
 	
 
-##########################################################
-# navigating around inside the posts of a subreddit
-var newpara = 0
+
 	
 func scroll_next():
-	#var newpara = 0
 	# Increase the scroll position by 1 line
-	# problem was that if you went down by article, then went down by 
-	print ("paragraphs[i]=",paragraphs[i],"j=",j)
-	if j > paragraphs[i]:
-		print ("boo!")
-		newpara = 0
-		while paragraphs[newpara] < j:
-			newpara += 1
-		i = newpara -1
-	print ("newpara=",newpara," paragraphs[newpara]",paragraphs[newpara]," i=",i," j=",j)
 	if i < paragraphs.size()-1:
 		i += 1
 	else: 
@@ -336,8 +303,6 @@ func scroll_up():
 		print("jump=",jump," i=",i)
 	rtl.scroll_to_line(j)
 
-##################################################################
-# link the actions to functions
 # Handle input for scrolling
 # this is where the actions that are defined in Project -> Project Settings -> Input Map
 # get tied to the functions here. 
@@ -354,27 +319,23 @@ func _input(event: InputEvent) -> void:
 		next_subreddit()
 	elif event.is_action_pressed("subprev"):
 		prev_subreddit()
+	elif event.is_action_pressed("toggle_subreddit_dialog"):
+		toggle_dialog()
 	elif event.is_action_pressed("toggle_controls"):
 		toggle_action()
-	elif event.is_action_pressed("sysstat"):
-		sysstat()
-##################################################################
 
 func toggle_action():
 	print ("toggle action", j)
 	$HBoxContainer/Actions.visible = !$HBoxContainer/Actions.visible
 	print($HBoxContainer/Actions.visible)
-##################################################################
+func toggle_dialog():
+	print ("toggle dialog", j)
+	$HBoxContainer/SubredditManagerDialog.visible = !$HBoxContainer/SubredditManagerDialog.visible
+	print($HBoxContainer/SubredditManagerDialog.visible)
 
 func get_reddit(url : String):
 	$HBoxContainer/HTTPRequest.connect("request_completed", Callable(self, "_on_request_completed"))
-	var error = $HBoxContainer/HTTPRequest.request(url)
-	if error != OK:
-		OS.alert("Error connecting to internet ")
-		var data = subreddit_cache["cache"][url]["data"]
-		process_reddit_data(data)
-
-
+	$HBoxContainer/HTTPRequest.request(url)
 	
 func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	if response_code == 200:
@@ -383,47 +344,14 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 		
 		if parse_result == OK:
 			var data = json.get_data()  # Use get_data() to retrieve the parsed JSON object
-			# make sure the parents are there 
-			if not subreddit_cache.has("cache"):
-				subreddit_cache["cache"] = {}  # Initialize it as an empty dictionary
-			if not subreddit_cache["cache"].has(url):
-				subreddit_cache["cache"][url] = {}
-			subreddit_cache["cache"][url]["data"] = data
-			save_data()
 			process_reddit_data(data)
 		else:
 			print("Failed to parse JSON")
 	else:
 		print("HTTP request failed with code: %d" % response_code)
-		
-		
-func save_data():
-	#var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
-	var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
-	var saved_data = {}
-	saved_data["cache"] = subreddit_cache
-	saved_data["subreddits"] = subreddits
-	
-	var json = JSON.stringify(saved_data)
-	file.store_string(json)
-	file.close()
 
-func load_data():
-	#var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
-	var file = FileAccess.open("user://redditcache.json", FileAccess.READ)
-	
-	var json = file.get_as_text()
-	var saved_data = JSON.parse_string(json)
-	
-	subreddit_cache = saved_data["cache"]
-	subreddits =  saved_data["subreddits"]
-	
-	file.close()
-	
 func process_reddit_data(data):
 	var flag = 0
-	i = 0
-	j = 0
 	# Show the name of the subreddit we're looking at 
 	var subreddit : String = url.get_file().get_basename()
 	DisplayServer.window_set_title(subreddit)
@@ -432,13 +360,10 @@ func process_reddit_data(data):
 	for post in data["data"]["children"]:
 		if flag == 0:
 			for element in post["data"]:
-				#print ("element: ", element)
-				pass
-			flag = 1
+				print ("element: ", element)
+			flag= 1
 		var post_title = post["data"]["title"]
 		var post_body = post["data"]["selftext"]
-		var post_created = post["data"]["created"]
-		var post_url = post["data"]["url"]
 #		var post_date = post["data"]["date"]
 
 		if rtl is RichTextLabel:
@@ -455,19 +380,8 @@ func process_reddit_data(data):
 		else:
 			print("RTL is not a RichTextLabel")
 		
+		#var scrollbar = rtl.get_v_scrollbar()
+		#add_title(post_date)
 		add_title(post_title)
-		#add_date(post_created)
-		add_body(post_body)
-		add_date(post_url)
-		# see if i can detect a post that is just a picture
-		#print ("check post for image")
-		var regex = RegEx.new()
-		regex.compile("(http.+[png|gif|jpg|jpeg|art])")
-		regex.compile("\\[(http.+)\\]")
-		var result = regex.search(post_body)
-		if result:
-			
-			print("first ",result.strings[1]) # Would print n-0123
-			print("found ",result.get_string()) # Would print n-0123
-	
-	subreddit_cache["cache"][url]["paragraphs"] = paragraphs
+		#print(post_title)	
+		add_line(":", post_body)
