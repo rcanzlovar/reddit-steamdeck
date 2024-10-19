@@ -13,7 +13,7 @@ extends Node
 
 @onready var k : int = 0 
 # track which subreddit index we are using 
-@onready var DEBUG : int = 1
+@onready var DEBUG : int = 0
  
 # track which subreddit index we are using 
 
@@ -21,7 +21,7 @@ extends Node
 # article headers for easier skipping around
 @onready var paragraphs : Array = [ 0 ]
 
-@export var subreddits : Array[String] = [
+@export var subreddits : Array = [
 	#"https://www.reddit.com/r/randnsfw.json",
 	"https://www.reddit.com/r/gonewildstories.json",
 	"https://www.reddit.com/r/gamedev.json",
@@ -42,11 +42,24 @@ extends Node
 # offline eventually. 
 @onready var subreddit_cache = {}
 
+# status is going to tell me if i am using offline content 
+var status = "-"
 
+
+func epoch_to_datetime(epoch: int) -> Dictionary:
+	var dt = Time.get_datetime_dict_from_unix_time(epoch) 
+	return {
+		"year": dt.year,
+		"month": dt.month,
+		"day": dt.day,
+		"hour": dt.hour,
+		"minute": dt.minute,
+		"second": dt.second
+	}
 
 
 # Returns a human-readable string from a date and time, date, or time dictionary.
-func datetime_to_string(date: Dictionary) -> void:
+func datetime_to_string(date: Dictionary):
 	if (
 		date.has("year")
 		and date.has("month")
@@ -379,6 +392,7 @@ func get_reddit(url : String):
 func get_reddit_offline(url):
 	#OS.alert("Load cache ",url)
 	print("**** Load cache ",url," ****")
+	status = "+cache" 
 	load_data()
 	var data = subreddit_cache["cache"][url]["data"]
 	process_reddit_data(data)
@@ -408,6 +422,8 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 		print("HTTP request failed with code: %d" % response_code)
 		
 		
+# as long as we save each time we get a subreddit, we can always read offline
+# whatever the latest was that we had. 
 func save_data():
 	#var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
 	var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
@@ -418,7 +434,8 @@ func save_data():
 	var json = JSON.stringify(saved_data)
 	file.store_string(json)
 	file.close()
-
+# if we can't get something from the internet, then we just load whatever the
+# last thing was from the cache
 func load_data():
 	#var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
 	var file = FileAccess.open("user://redditcache.json", FileAccess.READ)
@@ -428,10 +445,9 @@ func load_data():
 	#print (saved_data)
 	
 	subreddit_cache = saved_data["cache"]
-	#print (subreddit_cache)
 	#print(JSON.stringify(subreddit_cache, "\t"))
-	#print(JSON.print(person, "  "))
-	#subreddits =  saved_data["subreddits"]
+
+	subreddits =  saved_data["subreddits"]
 	
 	file.close()
 	
@@ -442,7 +458,9 @@ func process_reddit_data(data):
 	# Show the name of the subreddit we're looking at 
 	var subreddit : String = url.get_file().get_basename()
 	DisplayServer.window_set_title(subreddit)
-	$HBoxContainer/Actions/Label.text = subreddit
+
+
+	$HBoxContainer/Actions/Label.text = subreddit + status
 	# make a header of it 
 	add_header(subreddit)
 	for post in data["data"]["children"]:
@@ -454,6 +472,9 @@ func process_reddit_data(data):
 		var post_title = post["data"]["title"]
 		var post_body = post["data"]["selftext"]
 		var post_created = post["data"]["created"]
+		var date_dict = epoch_to_datetime(post_created)
+		var date_string = datetime_to_string(date_dict)  # Output: "2024-10-04 00:00:00"
+
 		var post_url = post["data"]["url"]
 #		var post_date = post["data"]["date"]
 
@@ -472,7 +493,7 @@ func process_reddit_data(data):
 			print("RTL is not a RichTextLabel")
 		
 		add_title(post_title)
-		#add_date(post_created)
+		add_date(date_string)
 		add_body(post_body)
 		add_date(post_url)
 		# see if i can detect a post that is just a picture
