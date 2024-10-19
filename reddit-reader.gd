@@ -3,6 +3,15 @@ extends Node
 @onready var rtl: RichTextLabel = $HBoxContainer/Features
 @onready var csharp_test: Node = $CSharpTest
 
+
+# abstract the http here 
+@onready var http_request = $HBoxContainer/HTTPRequest
+@onready var timeout_timer = $HBoxContainer/timeout_timer
+
+
+
+
+
 @onready var url : String = "https://www.reddit.com/r/gamedev.json"
 
 @onready var i : int = 0 
@@ -46,59 +55,12 @@ extends Node
 var status = "-"
 
 
-func epoch_to_datetime(epoch: int) -> Dictionary:
-	var dt = Time.get_datetime_dict_from_unix_time(epoch) 
-	return {
-		"year": dt.year,
-		"month": dt.month,
-		"day": dt.day,
-		"hour": dt.hour,
-		"minute": dt.minute,
-		"second": dt.second
-	}
-
-
-# Returns a human-readable string from a date and time, date, or time dictionary.
-func datetime_to_string(date: Dictionary):
-	if (
-		date.has("year")
-		and date.has("month")
-		and date.has("day")
-		and date.has("hour")
-		and date.has("minute")
-		and date.has("second")
-	):
-		# Date and time.
-		return "{year}-{month}-{day} {hour}:{minute}:{second}".format({
-			year = str(date.year).pad_zeros(2),
-			month = str(date.month).pad_zeros(2),
-			day = str(date.day).pad_zeros(2),
-			hour = str(date.hour).pad_zeros(2),
-			minute = str(date.minute).pad_zeros(2),
-			second = str(date.second).pad_zeros(2),
-		})
-	elif date.has("year") and date.has("month") and date.has("day"):
-		# Date only.
-		return "{year}-{month}-{day}".format({
-			year = str(date.year).pad_zeros(2),
-			month = str(date.month).pad_zeros(2),
-			day = str(date.day).pad_zeros(2),
-		})
-	else:
-		# Time only.
-		return "{hour}:{minute}:{second}".format({
-			hour = str(date.hour).pad_zeros(2),
-			minute = str(date.minute).pad_zeros(2),
-			second = str(date.second).pad_zeros(2),
-		})
-
 ##########################################################
 # Routines Related to writing to the scrollable RichTextLabel
 # RTL Related routines 
 # clear the rtl RichTextLabel
 func clear_display() -> void:
 	rtl.clear()
-
 
 func add_title(header: String) -> void:
 	rtl.append_text("\n[font_size=24][color=#6df]{header}[/color][/font_size]\n".format({
@@ -125,12 +87,10 @@ func add_line(key: String, value: Variant) -> void:
 	if typeof(value) == TYPE_BOOL:
 		# Colorize boolean values.
 		value = "[color=8f8]true[/color]" if value else "[color=#f88]false[/color]"
-
 	rtl.append_text("[color=#adf]{key}:[/color] {value}\n".format({
 		key = key,
 		value = value if str(value) != "" else "[color=#fff8](empty)[/color]",
 	}))
-
 ##########################################################
 
 func sysstat() -> void:
@@ -257,14 +217,59 @@ func _ready() -> void:
 	#get_reddit(url)
 	sysstat()
 	
+##########################################################
+# Time display (should be in a subroutine file) 
+func epoch_to_datetime(epoch: int) -> Dictionary:
+	var dt = Time.get_datetime_dict_from_unix_time(epoch) 
+	return {
+		"year": dt.year,
+		"month": dt.month,
+		"day": dt.day,
+		"hour": dt.hour,
+		"minute": dt.minute,
+		"second": dt.second
+	}
+
+# Returns a human-readable string from a date and time, date, or time dictionary.
+func datetime_to_string(date: Dictionary):
+	if (
+		date.has("year")
+		and date.has("month")
+		and date.has("day")
+		and date.has("hour")
+		and date.has("minute")
+		and date.has("second")
+	):
+		# Date and time.
+		return "{year}-{month}-{day} {hour}:{minute}:{second}".format({
+			year = str(date.year).pad_zeros(2),
+			month = str(date.month).pad_zeros(2),
+			day = str(date.day).pad_zeros(2),
+			hour = str(date.hour).pad_zeros(2),
+			minute = str(date.minute).pad_zeros(2),
+			second = str(date.second).pad_zeros(2),
+		})
+	elif date.has("year") and date.has("month") and date.has("day"):
+		# Date only.
+		return "{year}-{month}-{day}".format({
+			year = str(date.year).pad_zeros(2),
+			month = str(date.month).pad_zeros(2),
+			day = str(date.day).pad_zeros(2),
+		})
+	else:
+		# Time only.
+		return "{hour}:{minute}:{second}".format({
+			hour = str(date.hour).pad_zeros(2),
+			minute = str(date.minute).pad_zeros(2),
+			second = str(date.second).pad_zeros(2),
+		})
 	
 ##########################################################
 # SubReddit Related routines 
-
 # go to the next subreddit in the list, wrap around
 	
 func next_subreddit() -> void:
-	print ("#*#*#* subsize = ",subreddits.size(),"k=",k)
+	print ("next-sub subsize = ",subreddits.size(),"k=",k)
 	if k > subreddits.size() - 2:
 		k = 0
 	else:
@@ -279,7 +284,8 @@ func next_subreddit() -> void:
 	
 # go to the previous subreddit in the list, wrap around
 func prev_subreddit() -> void:
-	if k >= 0:
+	print ("prev-sub subsize = ",subreddits.size(),"k=",k)
+	if k > 0:
 		k =  subreddits.size() - 2
 	else:
 		k -= 1
@@ -288,7 +294,6 @@ func prev_subreddit() -> void:
 	clear_display()
 	paragraphs = [ 0 ]
 	get_reddit(url)
-	
 
 ##########################################################
 # navigating around inside the posts of a subreddit
@@ -329,12 +334,9 @@ func scroll_down():
 	var jump = rtl.get_visible_line_count()/2
 	if i < (paragraphs.size() - jump):
 		j += jump
-
 	rtl.scroll_to_line(j)
-
 	# Ensure it doesn't scroll beyond the top
 #	rtl.scroll_vertical = min(rtl.scroll_vertical, 0)
-
 
 func scroll_up():
 	#print ("scroll begin of scrolldown",rtl.scroll_vertical)
@@ -376,18 +378,21 @@ func toggle_action():
 	print($HBoxContainer/Actions.visible)
 ##################################################################
 
-func get_reddit(url : String):
-	if (DEBUG):
-		get_reddit_offline(url)
-		return
+func get_reddit(localurl : String):
+	# hack stash in the gloab
+	url = localurl
+	#if (DEBUG):
+		#get_reddit_offline(url)
+		#return
+	http_request.connect("request_completed", Callable(self, "_on_request_completed"))
+	# Start the timer for 30 seconds
+	timeout_timer.start(30.0)
 	
-	$HBoxContainer/HTTPRequest.connect("request_completed", Callable(self, "_on_request_completed"))
-	var error = $HBoxContainer/HTTPRequest.request(url)
-	#var error = "ERR" 
 	
-	# if we can't connec to the internet, maybe we have some interesting cached stuff
+	var error = http_request.request(localurl)
+	# if we can't connect to the internet, maybe we have some interesting cached stuff
 	if error != OK:
-		get_reddit_offline(url)
+		get_reddit_offline(localurl)
 
 func get_reddit_offline(url):
 	#OS.alert("Load cache ",url)
@@ -397,7 +402,12 @@ func get_reddit_offline(url):
 	var data = subreddit_cache["cache"][url]["data"]
 	process_reddit_data(data)
 	
-
+# Handle the timeout case
+func _on_timeout():
+	http_request.disconnect("request_completed", Callable(self, "_on_request_completed"))
+	print("Request timed out.")
+	# get the url that is in the global
+	get_reddit_offline(url)
 	
 func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	if response_code == 200:
@@ -415,6 +425,8 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 			subreddit_cache["cache"][url]["data"] = data
 			# and save a copy for the next time we need it offline
 			save_data()
+			# reset it to online
+			status = "-"
 			process_reddit_data(data)
 		else:
 			print("Failed to parse JSON")
@@ -492,18 +504,22 @@ func process_reddit_data(data):
 		else:
 			print("RTL is not a RichTextLabel")
 		
-		add_title(post_title)
 		add_date(date_string)
+		add_title(post_title)
 		add_body(post_body)
 		add_date(post_url)
 		# see if i can detect a post that is just a picture
 		#print ("check post for image")
 		var regex = RegEx.new()
-		regex.compile("(http.+[png|gif|jpg|jpeg|art])")
+		regex.compile("(http.?//+?[png|gif|jpg|jpeg|art])")
+		var result1 = regex.search(post_body)
+		if result1:
+			print("picture ",result1.strings[1]) # Would print n-0123
+			print ("******************************************")
+		#regex.compile("\\[(http.+)\\]")
 		regex.compile("\\[(http.+)\\]")
 		var result = regex.search(post_body)
 		if result:
-			
 			print("first ",result.strings[1]) # Would print n-0123
 			print("found ",result.get_string()) # Would print n-0123
 	
