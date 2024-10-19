@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://cs5ao0cfruk4c"
-path="res://.godot/imported/Go-Mono-Italic.ttf-db6fb38a0100fa54d2e3af861ccdf3ad.fontdata"
+uid="uid://cs8shrcleher6"
+path="res://.godot/imported/Go-Mono-Italic.ttf-886ec176a8e4cde9c249f9888c6e71c1.fontdata"
 
 [deps]
 
-source_file="res://fonts/Go-Mono-Italic.ttf"
-dest_files=["res://.godot/imported/Go-Mono-Italic.ttf-db6fb38a0100fa54d2e3af861ccdf3ad.fontdata"]
+source_file="res://Go-Mono-Italic.ttf"
+dest_files=["res://.godot/imported/Go-Mono-Italic.ttf-886ec176a8e4cde9c249f9888c6e71c1.fontdata"]
 
 [params]
 

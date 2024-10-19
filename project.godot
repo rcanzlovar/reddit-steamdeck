@@ -11,12 +11,7 @@ config_version=5
 [application]
 
 config/name="Reddit client"
-config/description="This demo showcases various OS-specific features in Godot.
-It can be used to test Godot while porting it to a
-new platform or to check for regressions.
-
-In a nutshell, this demo shows how you can get information from the
-operating system, or interact with the operating system."
+config/description="Reddt-steamdecker - a steamdeck compatible online and offline reddit scroller"
 config/tags=PackedStringArray("demo", "official", "porting")
 run/main_scene="res://reddit-reader.tscn"
 config/features=PackedStringArray("4.3")
@@ -37,6 +32,10 @@ window/stretch/aspect="expand"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/markdownlabel/plugin.cfg")
+
+[gui]
+
+theme/custom_font="res://fonts/Go-Regular.ttf"
 
 [input]
 

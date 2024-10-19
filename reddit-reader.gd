@@ -13,13 +13,16 @@ extends Node
 
 @onready var k : int = 0 
 # track which subreddit index we are using 
+@onready var DEBUG : int = 1
+ 
+# track which subreddit index we are using 
 
 # this is the array that has line offsets for the 
 # article headers for easier skipping around
 @onready var paragraphs : Array = [ 0 ]
 
 @export var subreddits : Array[String] = [
-	"https://www.reddit.com/r/randnsfw.json",
+	#"https://www.reddit.com/r/randnsfw.json",
 	"https://www.reddit.com/r/gonewildstories.json",
 	"https://www.reddit.com/r/gamedev.json",
 	"https://www.reddit.com/r/boomersbeingfools.json",	
@@ -254,29 +257,23 @@ func next_subreddit() -> void:
 	else:
 		k += 1
 	url = subreddits[k]
-	OS.alert("subreddits:",subreddits[2])
-
+	#OS.alert("subreddits:",subreddits[2])
 	clear_display()
-	
 	# clear the paragraphs index, make line 0 be the first paragraph
 	# to include the header 
 	paragraphs = [ 0 ]
-	
 	get_reddit(url)
 	
 # go to the previous subreddit in the list, wrap around
 func prev_subreddit() -> void:
-	if k == 0:
+	if k >= 0:
 		k =  subreddits.size() - 2
 	else:
 		k -= 1
 	url = subreddits[k]
-	
 	# wipe out the stuff in the display
 	clear_display()
-
 	paragraphs = [ 0 ]
-	
 	get_reddit(url)
 	
 
@@ -288,7 +285,7 @@ func scroll_next():
 	#var newpara = 0
 	# Increase the scroll position by 1 line
 	# problem was that if you went down by article, then went down by 
-	print ("paragraphs[i]=",paragraphs[i],"j=",j)
+	print ("paragraphs[i]=",paragraphs[i]," j=",j)
 	if j > paragraphs[i]:
 		print ("boo!")
 		newpara = 0
@@ -367,13 +364,25 @@ func toggle_action():
 ##################################################################
 
 func get_reddit(url : String):
+	if (DEBUG):
+		get_reddit_offline(url)
+		return
+	
 	$HBoxContainer/HTTPRequest.connect("request_completed", Callable(self, "_on_request_completed"))
 	var error = $HBoxContainer/HTTPRequest.request(url)
+	#var error = "ERR" 
+	
+	# if we can't connec to the internet, maybe we have some interesting cached stuff
 	if error != OK:
-		OS.alert("Error connecting to internet ")
-		var data = subreddit_cache["cache"][url]["data"]
-		process_reddit_data(data)
+		get_reddit_offline(url)
 
+func get_reddit_offline(url):
+	#OS.alert("Load cache ",url)
+	print("**** Load cache ",url," ****")
+	load_data()
+	var data = subreddit_cache["cache"][url]["data"]
+	process_reddit_data(data)
+	
 
 	
 func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
@@ -388,7 +397,9 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 				subreddit_cache["cache"] = {}  # Initialize it as an empty dictionary
 			if not subreddit_cache["cache"].has(url):
 				subreddit_cache["cache"][url] = {}
+			# stash the returned data into the cache...
 			subreddit_cache["cache"][url]["data"] = data
+			# and save a copy for the next time we need it offline
 			save_data()
 			process_reddit_data(data)
 		else:
@@ -414,9 +425,13 @@ func load_data():
 	
 	var json = file.get_as_text()
 	var saved_data = JSON.parse_string(json)
+	#print (saved_data)
 	
 	subreddit_cache = saved_data["cache"]
-	subreddits =  saved_data["subreddits"]
+	#print (subreddit_cache)
+	#print(JSON.stringify(subreddit_cache, "\t"))
+	#print(JSON.print(person, "  "))
+	#subreddits =  saved_data["subreddits"]
 	
 	file.close()
 	
@@ -427,6 +442,7 @@ func process_reddit_data(data):
 	# Show the name of the subreddit we're looking at 
 	var subreddit : String = url.get_file().get_basename()
 	DisplayServer.window_set_title(subreddit)
+	$HBoxContainer/Actions/Label.text = subreddit
 	# make a header of it 
 	add_header(subreddit)
 	for post in data["data"]["children"]:

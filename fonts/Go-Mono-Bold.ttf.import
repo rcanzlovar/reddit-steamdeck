@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://bbbebcndv1byf"
-path="res://.godot/imported/Go-Mono-Bold.ttf-dfc1382d8ce2e86e14a40f4ec7fb1dd4.fontdata"
+uid="uid://l5plow8onvpm"
+path="res://.godot/imported/Go-Mono-Bold.ttf-e3918e42bcc247878daba3e934ffcde6.fontdata"
 
 [deps]
 
-source_file="res://fonts/Go-Mono-Bold.ttf"
-dest_files=["res://.godot/imported/Go-Mono-Bold.ttf-dfc1382d8ce2e86e14a40f4ec7fb1dd4.fontdata"]
+source_file="res://Go-Mono-Bold.ttf"
+dest_files=["res://.godot/imported/Go-Mono-Bold.ttf-e3918e42bcc247878daba3e934ffcde6.fontdata"]
 
 [params]
 
