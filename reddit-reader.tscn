@@ -1,7 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://ds1y65r8ld026"]
+[gd_scene load_steps=6 format=3 uid="uid://ds1y65r8ld026"]
 
 [ext_resource type="Script" path="res://reddit-reader.gd" id="1"]
+[ext_resource type="Script" path="res://subreddit_dialog.gd" id="2_jr67s"]
 [ext_resource type="Script" path="res://actions.gd" id="4"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wkrsk"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dl4cr"]
 
@@ -9,10 +12,10 @@
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -1.0
-offset_top = 1.0
-offset_right = -1.0
-offset_bottom = 1.0
+offset_left = 19.0
+offset_top = 21.0
+offset_right = 19.0
+offset_bottom = 21.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
@@ -29,6 +32,51 @@ offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 10
+
+[node name="FileDialog" type="FileDialog" parent="HBoxContainer"]
+initial_position = 1
+size = Vector2i(295, 300)
+
+[node name="subredditDialog" type="AcceptDialog" parent="HBoxContainer"]
+mode = 3
+title = "Subreddits"
+position = Vector2i(100, 60)
+size = Vector2i(500, 570)
+ok_button_text = "Okie"
+script = ExtResource("2_jr67s")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/subredditDialog"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 592.0
+offset_bottom = 524.0
+
+[node name="subredditEdit" type="LineEdit" parent="HBoxContainer/subredditDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/subredditDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="Add" type="Button" parent="HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Add"
+
+[node name="Delete" type="Button" parent="HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Delete"
+
+[node name="Close" type="Button" parent="HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Close"
+
+[node name="subredditList" type="ItemList" parent="HBoxContainer/subredditDialog/VBoxContainer"]
+layout_mode = 2
+select_mode = 1
+max_text_lines = 20
+auto_height = true
+item_count = 1
+item_0/text = "all"
+item_0/icon = SubResource("AtlasTexture_wkrsk")
 
 [node name="Features" type="RichTextLabel" parent="HBoxContainer"]
 custom_minimum_size = Vector2(850, 0)
@@ -86,7 +134,6 @@ size_flags_vertical = 3
 text = "Change Window Title"
 
 [node name="ChangeWindowIcon" type="Button" parent="HBoxContainer/Actions/GridContainer"]
-visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3

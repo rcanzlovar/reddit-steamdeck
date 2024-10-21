@@ -1,18 +1,33 @@
 extends Node
+class_name RedditReader
 
 @onready var rtl: RichTextLabel = $HBoxContainer/Features
 @onready var csharp_test: Node = $CSharpTest
 
-
 # abstract the http here 
 @onready var http_request = $HBoxContainer/HTTPRequest
 @onready var timeout_timer = $HBoxContainer/timeout_timer
+# status is going to tell me if i am using offline content 
+var status = "-"
+
+# global place to stash a place 
+@export var uri = "https://www.reddit.com/r/gamedev.json"
+@export var subreddits: Array = [
+	"https://www.reddit.com/r/gonewildstories.json",
+	"https://www.reddit.com/r/gamedev.json",
+	"https://www.reddit.com/r/boomersbeingfools.json",
+	"https://www.reddit.com/r/anythinggoesnews.json",
+	"https://www.reddit.com/r/flipperzero.json",
+	"https://www.reddit.com/r/hitchhiking.json",
+	"https://www.reddit.com/r/leaves.json",
+	"https://www.reddit.com/r/petioles.json",
+	"https://www.reddit.com/r/nlp.json",
+	"https://www.reddit.com/r/outoftheloop.json",
+	"https://www.reddit.com/r/longmont.json"
+]
 
 
 
-
-
-@onready var url : String = "https://www.reddit.com/r/gamedev.json"
 
 @onready var i : int = 0 
 # track what paragraph we are in the scrollable window
@@ -23,27 +38,17 @@ extends Node
 @onready var k : int = 0 
 # track which subreddit index we are using 
 @onready var DEBUG : int = 0
- 
-# track which subreddit index we are using 
 
 # this is the array that has line offsets for the 
 # article headers for easier skipping around
 @onready var paragraphs : Array = [ 0 ]
 
-@export var subreddits : Array = [
-	#"https://www.reddit.com/r/randnsfw.json",
-	"https://www.reddit.com/r/gonewildstories.json",
-	"https://www.reddit.com/r/gamedev.json",
-	"https://www.reddit.com/r/boomersbeingfools.json",	
-	"https://www.reddit.com/r/anythinggoesnews.json",	
-	"https://www.reddit.com/r/flipperzero.json",	
-	"https://www.reddit.com/r/hitchhiking.json",	
-	"https://www.reddit.com/r/leaves.json",	
-	"https://www.reddit.com/r/petioles.json",	
-	"https://www.reddit.com/r/nlp.json",	
-	"https://www.reddit.com/r/outoftheloop.json",	
-	"https://www.reddit.com/r/longmont.json"
-]
+## subreddit list stuff below
+@onready var subreddit_list = $HBoxContainer/subredditDialog/VBoxContainer/subredditList
+@onready var subreddit_edit = $HBoxContainer/subredditDialog/VBoxContainer/subredditEdit
+@onready var subreddit_add = $HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer/Add
+@onready var subreddit_delete = $HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer/Delete
+@onready var subreddit_dialog = $HBoxContainer/subredditDialog
 
 #This is for caching subreddit content so i don't have 
 # to call the server just to move from one sub to 
@@ -51,10 +56,35 @@ extends Node
 # offline eventually. 
 @onready var subreddit_cache = {}
 
-# status is going to tell me if i am using offline content 
-var status = "-"
 
+# Populate the ItemList with the current subreddits
+func populate_subreddit_list():
+	subreddit_list.clear()
+	for subreddit in subreddits:
+		subreddit_list.add_item(subreddit)
 
+# Add a new subreddit when the "Add" button is pressed
+func _on_add_pressed():
+	print("Add pressed")
+	var new_subreddit = subreddit_edit.text.strip_edges()
+	if new_subreddit != "":
+		var formatted_subreddit = "https://www.reddit.com/r/%s.json" % new_subreddit
+		subreddits.append(formatted_subreddit)
+		subreddit_edit.clear()  # Clear the input field
+		populate_subreddit_list()  # Refresh the list
+	else:
+		print("No value entered to add.")
+
+# Delete the selected subreddit when the "Delete" button is pressed
+func _on_delete_pressed():
+	print("delete pressed")
+	var selected = subreddit_list.get_selected_items()
+	if selected.size() > 0:
+		var index = selected[0]  # Get the first selected index
+		subreddits.remove_at(index)
+		populate_subreddit_list()  # Refresh the list
+	else:
+		print("No item selected to delete.")
 ##########################################################
 # Routines Related to writing to the scrollable RichTextLabel
 # RTL Related routines 
@@ -213,6 +243,7 @@ func _ready() -> void:
 	rtl.grab_focus()
 	# wipe out the stuff in the display
 	clear_display()
+	populate_subreddit_list()
 	
 	#get_reddit(url)
 	sysstat()
@@ -274,13 +305,14 @@ func next_subreddit() -> void:
 		k = 0
 	else:
 		k += 1
-	url = subreddits[k]
+	uri = subreddits[k]
 	#OS.alert("subreddits:",subreddits[2])
 	clear_display()
 	# clear the paragraphs index, make line 0 be the first paragraph
 	# to include the header 
 	paragraphs = [ 0 ]
-	get_reddit(url)
+	print ("==next)subreddit uri is ",uri)
+	get_reddit(uri)
 	
 # go to the previous subreddit in the list, wrap around
 func prev_subreddit() -> void:
@@ -289,11 +321,11 @@ func prev_subreddit() -> void:
 		k =  subreddits.size() - 2
 	else:
 		k -= 1
-	url = subreddits[k]
+	uri = subreddits[k]
 	# wipe out the stuff in the display
 	clear_display()
 	paragraphs = [ 0 ]
-	get_reddit(url)
+	get_reddit(uri)
 
 ##########################################################
 # navigating around inside the posts of a subreddit
@@ -368,19 +400,37 @@ func _input(event: InputEvent) -> void:
 		prev_subreddit()
 	elif event.is_action_pressed("toggle_controls"):
 		toggle_action()
+	elif event.is_action_pressed("toggle_subreddits"):
+		toggle_subreddits()
 	elif event.is_action_pressed("sysstat"):
 		sysstat()
+	#elif event.is_action_pressed(subreddit_delete):
+		#_on_delete_pressed()
+	#elif event.is_action_pressed(subreddit_add):
+		#_on_add_pressed()
 ##################################################################
 
 func toggle_action():
 	print ("toggle action", j)
 	$HBoxContainer/Actions.visible = !$HBoxContainer/Actions.visible
 	print($HBoxContainer/Actions.visible)
-##################################################################
+func toggle_subreddits():
+	print ("toggle subreddits", j)
+	populate_subreddit_list()
+	subreddit_dialog.visible = !subreddit_dialog.visible
+	#/root/Reddit-reader/HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer/Add
+	
+	# Clear existing items and add "foo" to the list
+	#var subreddit_list = $HBoxContainer/subredditDialog/VBoxContainer/subredditList
+	#subreddit_list.clear()  # Optional: Clear the list if you want to reset it
+	#for sub in  subreddits: 
+		#print ("sub=",sub)
+		#subreddit_list.add_item(sub)
+###################################################################
 
 func get_reddit(localurl : String):
 	# hack stash in the gloab
-	url = localurl
+	uri = localurl
 	#if (DEBUG):
 		#get_reddit_offline(url)
 		#return
@@ -394,12 +444,12 @@ func get_reddit(localurl : String):
 	if error != OK:
 		get_reddit_offline(localurl)
 
-func get_reddit_offline(url):
+func get_reddit_offline(uri):
 	#OS.alert("Load cache ",url)
-	print("**** Load cache ",url," ****")
+	print("**** Load cache ",uri," ****")
 	status = "+cache" 
 	load_data()
-	var data = subreddit_cache["cache"][url]["data"]
+	var data = subreddit_cache["cache"][uri]["data"]
 	process_reddit_data(data)
 	
 # Handle the timeout case
@@ -407,7 +457,7 @@ func _on_timeout():
 	http_request.disconnect("request_completed", Callable(self, "_on_request_completed"))
 	print("Request timed out.")
 	# get the url that is in the global
-	get_reddit_offline(url)
+	get_reddit_offline(uri)
 	
 func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	if response_code == 200:
@@ -419,10 +469,10 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 			# make sure the parents are there 
 			if not subreddit_cache.has("cache"):
 				subreddit_cache["cache"] = {}  # Initialize it as an empty dictionary
-			if not subreddit_cache["cache"].has(url):
-				subreddit_cache["cache"][url] = {}
+			if not subreddit_cache["cache"].has(uri):
+				subreddit_cache["cache"][uri] = {}
 			# stash the returned data into the cache...
-			subreddit_cache["cache"][url]["data"] = data
+			subreddit_cache["cache"][uri]["data"] = data
 			# and save a copy for the next time we need it offline
 			save_data()
 			# reset it to online
@@ -468,7 +518,7 @@ func process_reddit_data(data):
 	i = 0
 	j = 0
 	# Show the name of the subreddit we're looking at 
-	var subreddit : String = url.get_file().get_basename()
+	var subreddit : String = uri.get_file().get_basename()
 	DisplayServer.window_set_title(subreddit)
 
 
@@ -491,7 +541,7 @@ func process_reddit_data(data):
 #		var post_date = post["data"]["date"]
 
 		if rtl is RichTextLabel:
-			#var scrollbar = rtl.get_v_scroll_bar()
+			# stash the line count before we add the post
 			var scrollbar = rtl.get_line_count()
 			paragraphs.append(scrollbar)
 			#print (scrollbar)
@@ -504,8 +554,8 @@ func process_reddit_data(data):
 		else:
 			print("RTL is not a RichTextLabel")
 		
-		add_date(date_string)
 		add_title(post_title)
+		add_date(date_string)
 		add_body(post_body)
 		add_date(post_url)
 		# see if i can detect a post that is just a picture
@@ -523,4 +573,4 @@ func process_reddit_data(data):
 			print("first ",result.strings[1]) # Would print n-0123
 			print("found ",result.get_string()) # Would print n-0123
 	
-	subreddit_cache["cache"][url]["paragraphs"] = paragraphs
+	subreddit_cache["cache"][uri]["paragraphs"] = paragraphs
