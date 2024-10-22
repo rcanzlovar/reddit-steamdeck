@@ -3,6 +3,7 @@ extends Node
 
 var RedditReader = load("res://reddit-reader.gd")
 var reader_instance = RedditReader.new()  # Creates a new instance of the class
+var subreddit_list_data = reader_instance.subreddits  # Store the subreddit data
 
 func _on_open_shell_web_pressed() -> void:
 	#OS.shell_open(url)
@@ -37,6 +38,7 @@ func _on_change_window_icon_pressed() -> void:
 	## demonstrate pulling variable from other script
 	print(reader_instance.uri)  # Access the `uri` variable
 	#print(reader_instance.subreddits)  # Access the `url` variable
+	print (subreddit_list_data)
 
 
 	#do_cool_stuff()

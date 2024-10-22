@@ -57,34 +57,34 @@ var status = "-"
 @onready var subreddit_cache = {}
 
 
-# Populate the ItemList with the current subreddits
-func populate_subreddit_list():
-	subreddit_list.clear()
-	for subreddit in subreddits:
-		subreddit_list.add_item(subreddit)
-
-# Add a new subreddit when the "Add" button is pressed
-func _on_add_pressed():
-	print("Add pressed")
-	var new_subreddit = subreddit_edit.text.strip_edges()
-	if new_subreddit != "":
-		var formatted_subreddit = "https://www.reddit.com/r/%s.json" % new_subreddit
-		subreddits.append(formatted_subreddit)
-		subreddit_edit.clear()  # Clear the input field
-		populate_subreddit_list()  # Refresh the list
-	else:
-		print("No value entered to add.")
-
-# Delete the selected subreddit when the "Delete" button is pressed
-func _on_delete_pressed():
-	print("delete pressed")
-	var selected = subreddit_list.get_selected_items()
-	if selected.size() > 0:
-		var index = selected[0]  # Get the first selected index
-		subreddits.remove_at(index)
-		populate_subreddit_list()  # Refresh the list
-	else:
-		print("No item selected to delete.")
+## Populate the ItemList with the current subreddits
+#func populate_subreddit_list():
+	#subreddit_list.clear()
+	#for subreddit in subreddits:
+		#subreddit_list.add_item(subreddit)
+#
+## Add a new subreddit when the "Add" button is pressed
+#func _on_add_pressed():
+	#print("Add pressed")
+	#var new_subreddit = subreddit_edit.text.strip_edges()
+	#if new_subreddit != "":
+		#var formatted_subreddit = "https://www.reddit.com/r/%s.json" % new_subreddit
+		#subreddits.append(formatted_subreddit)
+		#subreddit_edit.clear()  # Clear the input field
+		#populate_subreddit_list()  # Refresh the list
+	#else:
+		#print("No value entered to add.")
+#
+## Delete the selected subreddit when the "Delete" button is pressed
+#func _on_delete_pressed():
+	#print("delete pressed")
+	#var selected = subreddit_list.get_selected_items()
+	#if selected.size() > 0:
+		#var index = selected[0]  # Get the first selected index
+		#subreddits.remove_at(index)
+		#populate_subreddit_list()  # Refresh the list
+	#else:
+		#print("No item selected to delete.")
 ##########################################################
 # Routines Related to writing to the scrollable RichTextLabel
 # RTL Related routines 
@@ -243,7 +243,7 @@ func _ready() -> void:
 	rtl.grab_focus()
 	# wipe out the stuff in the display
 	clear_display()
-	populate_subreddit_list()
+	#populate_subreddit_list()
 	
 	#get_reddit(url)
 	sysstat()
@@ -416,7 +416,7 @@ func toggle_action():
 	print($HBoxContainer/Actions.visible)
 func toggle_subreddits():
 	print ("toggle subreddits", j)
-	populate_subreddit_list()
+	#populate_subreddit_list()
 	subreddit_dialog.visible = !subreddit_dialog.visible
 	#/root/Reddit-reader/HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer/Add
 	
