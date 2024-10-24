@@ -32,6 +32,7 @@ var status = "-"
 @onready var paragraphs : Array = [ 0 ]
 
 ## subreddit list stuff below
+#@onready var subreddit_list = get_node("/root/Reddit-reader/HBoxContainer/subredditDialog/VBoxContainer/subredditList")
 @onready var subreddit_list = $HBoxContainer/subredditDialog/VBoxContainer/subredditList
 @onready var subreddit_edit = $HBoxContainer/subredditDialog/VBoxContainer/subredditEdit
 @onready var subreddit_add = $HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer/Add
@@ -309,7 +310,7 @@ func prev_subreddit() -> void:
 	if k > 1:
 		k -= 1
 	else:
-		k =  subreddits.size() - 2
+		k =  subreddits.size() - 1
 	uri = subreddits[k]
 	# wipe out the stuff in the display
 	clear_display()
@@ -419,14 +420,14 @@ func toggle_subreddits():
 
 func get_reddit(localurl : String):
 	# hack stash in the gloab
-	uri = localurl
+	#uri = localurl
+	RedditGlobals.uri = localurl
 	#if (DEBUG):
 		#get_reddit_offline(url)
 		#return
 	http_request.connect("request_completed", Callable(self, "_on_request_completed"))
 	# Start the timer for 30 seconds
 	timeout_timer.start(30.0)
-	
 	
 	var error = http_request.request(localurl)
 	# if we can't connect to the internet, maybe we have some interesting cached stuff
@@ -476,8 +477,11 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 # as long as we save each time we get a subreddit, we can always read offline
 # whatever the latest was that we had. 
 func save_data():
+	# actual location: 
+	# "/home/deck/.var/app/org.godotengine.Godot/data/godot/app_userdata/Reddit client/redditcachenew.json"
+
 	#var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
-	var file = FileAccess.open("user://redditcachenew.json", FileAccess.WRITE)
+	var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
 	var saved_data = {}
 	saved_data["cache"] = subreddit_cache
 	saved_data["subreddits"] = subreddits
@@ -499,19 +503,29 @@ func load_data():
 	#print (saved_data)
 	
 	subreddit_cache = saved_data["cache"]
-	#print(JSON.stringify(subreddit_cache, "\t"))
-
-	subreddits =  saved_data["subreddits"]
-	print ("subreddits ", subreddits)
-	print ("RedditGlobals.subreddits", RedditGlobals.subreddits)
-	
 	RedditGlobals.subreddits.clear()
-	#for subreddit in subreddit_list_data:
+	print ("RedditGlobals.subreddits:", RedditGlobals.subreddits)
+	print ("saved_data.subreddits:", saved_data.subreddits)
+
+
+	#print(JSON.stringify(subreddit_cache, "\t"))
 	for subreddit in  saved_data["subreddits"]:
 		RedditGlobals.subreddits.append(subreddit)
-		
-	print ("after RedditGlobals.subreddits", RedditGlobals.subreddits)
+
+	#RedditGlobals.subreddits = saved_data["subreddits"]
+	print ("subreddits >> ", subreddits)
+	print ("RedditGlobals.subreddits >> ", RedditGlobals.subreddits)
 	
+	#for subreddit in subreddit_list_data:
+
+	
+	subreddit_list.clear()
+	#for subreddit in subreddit_list_data:
+	for subreddit in  RedditGlobals.subreddits:
+		print ("sub:", subreddit)
+		subreddit_list.add_item(subreddit)
+	print ("after RedditGlobals.subreddits", RedditGlobals.subreddits)
+
 	
 func process_reddit_data(data):
 	var flag = 0

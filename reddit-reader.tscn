@@ -65,10 +65,6 @@ text = "Add"
 layout_mode = 2
 text = "Delete"
 
-[node name="Close" type="Button" parent="HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-text = "Close"
-
 [node name="subredditList" type="ItemList" parent="HBoxContainer/subredditDialog/VBoxContainer"]
 layout_mode = 2
 select_mode = 1
@@ -209,6 +205,10 @@ text = "Kill Current Process"
 [node name="HTTPRequest" type="HTTPRequest" parent="HBoxContainer"]
 
 [node name="timeout_timer" type="Timer" parent="HBoxContainer"]
+
+[node name="Refresh" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Refresh"
 
 [node name="CSharpTest" type="Node" parent="."]
 
