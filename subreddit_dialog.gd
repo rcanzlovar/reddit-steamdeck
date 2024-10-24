@@ -1,8 +1,6 @@
 extends AcceptDialog
 
-@onready var RedditReader = load("res://reddit-reader.gd")
-@onready var reader_instance = RedditReader.new()  # Creates a new instance of the class
-@onready var subreddit_list_data = reader_instance.subreddits  # Store the subreddit data
+@onready var subreddit_list_data = RedditGlobals.subreddits  # Store the subreddit data
 
 @onready var subreddit_edit = get_node("/root/Reddit-reader/HBoxContainer/subredditDialog/VBoxContainer/subredditEdit")
 @onready var subreddit_list = get_node("/root/Reddit-reader/HBoxContainer/subredditDialog/VBoxContainer/subredditList")
@@ -33,7 +31,7 @@ func _ready() -> void:
 func populate_subreddit_list():
 	subreddit_list.clear()
 	#for subreddit in subreddit_list_data:
-	for subreddit in reader_instance.subreddits:
+	for subreddit in  RedditGlobals.subreddits:
 		subreddit_list.add_item(subreddit)
 
 # Add a new subreddit when the "Add" button is pressed
@@ -42,12 +40,9 @@ func _on_add_pressed():
 	var new_subreddit = subreddit_edit.text.strip_edges()
 	if new_subreddit != "":
 		var formatted_subreddit = "https://www.reddit.com/r/%s.json" % new_subreddit
-		subreddit_list_data.append(formatted_subreddit)
-		print (subreddit_list_data)
-		print (reader_instance.subreddits)
-		reader_instance.subreddits.append(formatted_subreddit)
+		print (RedditGlobals.subreddits)
+		RedditGlobals.subreddits.append(formatted_subreddit)
 		#reader_instance.subreddits = subreddit_list_data 
-		reader_instance.save_data()
 		subreddit_edit.clear()  # Clear the input field
 		populate_subreddit_list()  # Refresh the list
 		#reader_instance:save_data()
@@ -61,8 +56,6 @@ func _on_delete_pressed():
 	if selected.size() > 0:
 		var index = selected[0]  # Get the first selected index
 		subreddit_list_data.remove_at(index)
-		reader_instance.save_data()
-		reader_instance.subreddits = subreddit_list_data 
 		subreddit_edit.clear()  # Clear the input field
 		populate_subreddit_list()  # Refresh the list
 	else:

@@ -19,6 +19,10 @@ run/low_processor_mode=true
 boot_splash/image="/home/rca/Pictures/Bob Dobbs Slack like hope .png"
 config/icon="res://icon.webp"
 
+[autoload]
+
+RedditGlobals="*res://globals.gd"
+
 [debug]
 
 gdscript/warnings/untyped_declaration=1

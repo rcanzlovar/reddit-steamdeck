@@ -1,16 +1,14 @@
 #class Actions:
 extends Node
 
-var RedditReader = load("res://reddit-reader.gd")
-var reader_instance = RedditReader.new()  # Creates a new instance of the class
-var subreddit_list_data = reader_instance.subreddits  # Store the subreddit data
+var subreddit_list_data = RedditGlobals.subreddits  # Store the subreddit data
 
 func _on_open_shell_web_pressed() -> void:
 	#OS.shell_open(url)
 	#print("url ",url)
 	#OS.shell_open("https://rcanzlovar.com/drugfiend/")
-	reader_instance.uri = "https://reddit.com/r/longmont"
-	OS.shell_open(reader_instance.uri)
+	RedditGlobals.uri = "https://reddit.com/r/longmont"
+	OS.shell_open(RedditGlobals.uri)
 	#var script_a = get_node("res://reddit-reader.gd")
 	#OS.shell_open(RedditReader.url)  # Acces shared_value from Script A res://reddit-reader.gd
 	#print(script_a)  # Acces shared_value from Script A
@@ -36,22 +34,9 @@ func _on_change_window_title_pressed() -> void:
 
 func _on_change_window_icon_pressed() -> void:
 	## demonstrate pulling variable from other script
-	print(reader_instance.uri)  # Access the `uri` variable
+	print(RedditGlobals.uri)  # Access the `uri` variable
 	#print(reader_instance.subreddits)  # Access the `url` variable
 	print (subreddit_list_data)
-
-
-	#do_cool_stuff()
-	#move.type_array = type_chart_instance.chart[3]
-func xxxx_on_change_window_icon_pressed() -> void:
-	
-	if not DisplayServer.has_feature(DisplayServer.FEATURE_ICON):
-		OS.alert("Changing the window icon is not supported by the current display server (%s)." % DisplayServer.get_name())
-		return
-
-	var image := Image.create(128, 128, false, Image.FORMAT_RGB8)
-	image.fill(Color(1, 0.6, 0.3))
-	DisplayServer.set_icon(image)
 
 
 func _on_move_window_to_foreground_pressed() -> void:

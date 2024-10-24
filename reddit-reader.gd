@@ -11,21 +11,9 @@ class_name RedditReader
 var status = "-"
 
 # global place to stash a place 
-@export var uri = "https://www.reddit.com/r/gamedev.json"
-@export var subreddits: Array = [
-	"https://www.reddit.com/r/gonewildstories.json",
-	"https://www.reddit.com/r/gamedev.json",
-	"https://www.reddit.com/r/boomersbeingfools.json",
-	"https://www.reddit.com/r/anythinggoesnews.json",
-	"https://www.reddit.com/r/flipperzero.json",
-	"https://www.reddit.com/r/hitchhiking.json",
-	"https://www.reddit.com/r/leaves.json",
-	"https://www.reddit.com/r/petioles.json",
-	"https://www.reddit.com/r/nlp.json",
-	"https://www.reddit.com/r/outoftheloop.json",
-	"https://www.reddit.com/r/longmont.json"
-]
-
+#@export var uri = "https://www.reddit.com/r/gamedev.json"
+@export var uri = RedditGlobals.uri
+@onready var subreddits = RedditGlobals.subreddits
 
 
 
@@ -86,6 +74,17 @@ var status = "-"
 	#else:
 		#print("No item selected to delete.")
 ##########################################################
+## SO IT BEGINS...
+##
+
+func _ready() -> void:
+	load_data() # load the subreddits and the last cached info
+	# Grab focus so that the list can be scrolled (for keyboard/controller-friendly navigation).
+	rtl.grab_focus() # grab the main display
+	clear_display() # clear it
+
+	sysstat() # something interesting to look at 
+
 # Routines Related to writing to the scrollable RichTextLabel
 # RTL Related routines 
 # clear the rtl RichTextLabel
@@ -238,16 +237,6 @@ func sysstat() -> void:
 		add_line("Adapter driver version", video_adapter_driver_info[1])
 
 
-func _ready() -> void:
-	# Grab focus so that the list can be scrolled (for keyboard/controller-friendly navigation).
-	rtl.grab_focus()
-	# wipe out the stuff in the display
-	clear_display()
-	#populate_subreddit_list()
-	
-	#get_reddit(url)
-	sysstat()
-	
 ##########################################################
 # Time display (should be in a subroutine file) 
 func epoch_to_datetime(epoch: int) -> Dictionary:
@@ -301,7 +290,7 @@ func datetime_to_string(date: Dictionary):
 	
 func next_subreddit() -> void:
 	print ("next-sub subsize = ",subreddits.size(),"k=",k)
-	if k > subreddits.size() - 2:
+	if k >= subreddits.size() - 1:
 		k = 0
 	else:
 		k += 1
@@ -317,10 +306,10 @@ func next_subreddit() -> void:
 # go to the previous subreddit in the list, wrap around
 func prev_subreddit() -> void:
 	print ("prev-sub subsize = ",subreddits.size(),"k=",k)
-	if k > 0:
-		k =  subreddits.size() - 2
-	else:
+	if k > 1:
 		k -= 1
+	else:
+		k =  subreddits.size() - 2
 	uri = subreddits[k]
 	# wipe out the stuff in the display
 	clear_display()
@@ -488,7 +477,7 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 # whatever the latest was that we had. 
 func save_data():
 	#var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
-	var file = FileAccess.open("user://redditcache.json", FileAccess.WRITE)
+	var file = FileAccess.open("user://redditcachenew.json", FileAccess.WRITE)
 	var saved_data = {}
 	saved_data["cache"] = subreddit_cache
 	saved_data["subreddits"] = subreddits
@@ -503,6 +492,9 @@ func load_data():
 	var file = FileAccess.open("user://redditcache.json", FileAccess.READ)
 	
 	var json = file.get_as_text()
+	file.close()
+
+
 	var saved_data = JSON.parse_string(json)
 	#print (saved_data)
 	
@@ -510,8 +502,16 @@ func load_data():
 	#print(JSON.stringify(subreddit_cache, "\t"))
 
 	subreddits =  saved_data["subreddits"]
+	print ("subreddits ", subreddits)
+	print ("RedditGlobals.subreddits", RedditGlobals.subreddits)
 	
-	file.close()
+	RedditGlobals.subreddits.clear()
+	#for subreddit in subreddit_list_data:
+	for subreddit in  saved_data["subreddits"]:
+		RedditGlobals.subreddits.append(subreddit)
+		
+	print ("after RedditGlobals.subreddits", RedditGlobals.subreddits)
+	
 	
 func process_reddit_data(data):
 	var flag = 0
