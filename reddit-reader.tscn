@@ -42,28 +42,32 @@ mode = 3
 title = "Subreddits"
 position = Vector2i(100, 60)
 size = Vector2i(500, 570)
+visible = true
 ok_button_text = "Okie"
 script = ExtResource("2_jr67s")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/subredditDialog"]
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 592.0
+offset_right = 492.0
 offset_bottom = 524.0
-
-[node name="subredditEdit" type="LineEdit" parent="HBoxContainer/subredditDialog/VBoxContainer"]
-layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/subredditDialog/VBoxContainer"]
 layout_mode = 2
+alignment = 1
 
 [node name="Add" type="Button" parent="HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 text = "Add"
 
 [node name="Delete" type="Button" parent="HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(200, 50)
 layout_mode = 2
 text = "Delete"
+
+[node name="subredditEdit" type="LineEdit" parent="HBoxContainer/subredditDialog/VBoxContainer"]
+layout_mode = 2
 
 [node name="subredditList" type="ItemList" parent="HBoxContainer/subredditDialog/VBoxContainer"]
 layout_mode = 2
@@ -205,10 +209,6 @@ text = "Kill Current Process"
 [node name="HTTPRequest" type="HTTPRequest" parent="HBoxContainer"]
 
 [node name="timeout_timer" type="Timer" parent="HBoxContainer"]
-
-[node name="Refresh" type="Button" parent="HBoxContainer"]
-layout_mode = 2
-text = "Refresh"
 
 [node name="CSharpTest" type="Node" parent="."]
 

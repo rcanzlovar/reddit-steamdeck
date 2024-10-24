@@ -7,8 +7,9 @@ func _on_open_shell_web_pressed() -> void:
 	#OS.shell_open(url)
 	#print("url ",url)
 	#OS.shell_open("https://rcanzlovar.com/drugfiend/")
-	RedditGlobals.uri = "https://reddit.com/r/longmont"
-	OS.shell_open(RedditGlobals.uri)
+	#RedditGlobals.uri = "https://reddit.com/r/longmont"
+	var shorter = RedditGlobals.uri.left(-5) # remove .json
+	OS.shell_open(shorter)
 	#var script_a = get_node("res://reddit-reader.gd")
 	#OS.shell_open(RedditReader.url)  # Acces shared_value from Script A res://reddit-reader.gd
 	#print(script_a)  # Acces shared_value from Script A

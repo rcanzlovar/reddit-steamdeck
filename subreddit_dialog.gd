@@ -10,7 +10,7 @@ extends AcceptDialog
 @onready var subreddit_list = get_node("/root/Reddit-reader/HBoxContainer/subredditDialog/VBoxContainer/subredditList")
 @onready var add_button = (get_node("/root/Reddit-reader/HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer/Add"))
 @onready var delete_button = (get_node("/root/Reddit-reader/HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer/Delete"))
-@onready var refresh_button = (get_node("/root/Reddit-reader/HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer/Refresh"))
+#@onready var refresh_button = (get_node("/root/Reddit-reader/HBoxContainer/subredditDialog/VBoxContainer/HBoxContainer/Refresh"))
 
 func _ready() -> void:
 	#print("subreddit_list: ", subreddit_list)

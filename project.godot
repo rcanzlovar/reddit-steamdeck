@@ -16,7 +16,7 @@ config/tags=PackedStringArray("demo", "official", "porting")
 run/main_scene="res://reddit-reader.tscn"
 config/features=PackedStringArray("4.3")
 run/low_processor_mode=true
-boot_splash/image="/home/rca/Pictures/Bob Dobbs Slack like hope .png"
+boot_splash/image="images/BobDobbsSlackHope.png"
 config/icon="res://icon.webp"
 
 [autoload]
