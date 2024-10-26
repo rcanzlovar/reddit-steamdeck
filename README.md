@@ -40,6 +40,10 @@ key for subreddit name (like for r/all) : subreddit_name_prefixed
 
 
 
+![image](files:10053664_20241024022022_1.png)  
+
+![image](files:10053664_20241024022034_1.png)
+
 
 
 
